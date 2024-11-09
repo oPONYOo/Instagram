@@ -1,6 +1,5 @@
 package com.example.instagram
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,7 +20,6 @@ fun StoryLinearIndicator(indicators: List<Indicator>) {
     LazyRow(
     ) {
         items(items = indicators, key = { indicator -> indicator.idx }) {
-//            Log.e("ponyo", "${it.currentProgress}")
             LinearProgressIndicator(
                 progress = it.currentProgress,
                 Modifier
@@ -45,9 +43,10 @@ suspend fun loadProgress(updateProgress: (Float) -> Unit) {
 @Composable
 @Preview(showBackground = true)
 fun StoryIndicatorPreview() {
-    StoryLinearTest()
+//    StoryLinearTest()
 }
 
+/*
 @Composable
 private fun StoryLinearTest() {
     val list = List(2) {
@@ -65,4 +64,4 @@ private fun StoryLinearTest() {
             )
         }
     }
-}
+}*/

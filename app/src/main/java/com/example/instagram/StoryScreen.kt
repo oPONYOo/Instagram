@@ -1,6 +1,5 @@
 package com.example.instagram
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -26,13 +25,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.instagram.ui.model.Image
-import com.example.instagram.ui.model.Indicator
-import com.example.instagram.ui.model.Story
+import com.example.instagram.viewmodel.StoryViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun StoryScreen(modifier: Modifier, pages: List<Story>) {
+fun StoryScreen(
+    modifier: Modifier, viewModel: StoryViewModel = viewModel()
+) {
+    val pages by remember { mutableStateOf(viewModel.pages) }
     val pagerState = rememberPagerState(pageCount = {
         pages.size
     })
@@ -56,7 +58,7 @@ fun StoryScreen(modifier: Modifier, pages: List<Story>) {
             modifier = modifier
                 .background(Color.LightGray)
                 .fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.TopCenter
         ) {
             val nowStory = pages[idx]
             val nowStoryImgList = nowStory.imgList
@@ -67,11 +69,19 @@ fun StoryScreen(modifier: Modifier, pages: List<Story>) {
             val nowStoryIndicators by remember {
                 mutableStateOf(nowStory.indicators.toMutableList())
             }
+            // progress 값을 업데이트 할지여부 ... 그럼 얘를 계속..관리해야하는데?
+//            val foo: (av: Boolean) -> Float? = 0
+            var updateAvailable by remember { mutableStateOf(true) }
             LaunchedEffect(loading) {
                 loading = true
                 scope.launch {
                     loadProgress { progress ->
-                        currentProgress = progress
+                        // loadProgress 도중에 currentProgress를 바꾸려면?
+                        // loadprogress 도중에 flag 설치?
+                        // 뷰모델로 로직 옮기자
+                        if (updateAvailable) {
+                            currentProgress = progress
+                        }
                     }
                     if (currentProgress == 1f) {
                         currentProgress = 0f
@@ -94,9 +104,12 @@ fun StoryScreen(modifier: Modifier, pages: List<Story>) {
             StoryImage(
                 imgs = nowStoryImgList,
                 leftClickEvent = {
-                    if (showImageOrder > nowStory.imgListSize - 1) {
-                        loading = false
+                    if (showImageOrder > 0) {
                         currentProgress = 0f
+                        val temp =
+                            nowStoryIndicators[showImageOrder].copy(currentProgress = currentProgress)
+                        nowStoryIndicators[showImageOrder] = temp
+
                         showImageOrder -= 1
                     } else {
                         rememberCoroutineScope.launch {
@@ -107,6 +120,10 @@ fun StoryScreen(modifier: Modifier, pages: List<Story>) {
                 },
                 rightClickEvent = {
                     if (showImageOrder < nowStory.imgListSize - 1) {
+                        currentProgress = 1f
+                        val temp =
+                            nowStoryIndicators[showImageOrder].copy(currentProgress = currentProgress)
+                        nowStoryIndicators[showImageOrder] = temp
                         showImageOrder += 1
                     } else {
                         rememberCoroutineScope.launch {
@@ -151,25 +168,6 @@ fun StoryImage(
 @Preview(showBackground = true)
 @Composable
 fun StoryScreenPreview() {
-    val pages = List(2) {
-        getMockStory(it)
-    }
-    StoryScreen(modifier = Modifier, pages = pages)
+    StoryScreen(modifier = Modifier)
 }
 
-private fun getMockStory(idx: Int) = Story( // 한 명의 스토리
-    idx = idx,
-    name = "지냐${idx}",
-    imgList = listOf(
-        getMockImage(0, "https://picsum.photos/400/701"),
-        getMockImage(1, "https://picsum.photos/400/702"),
-        getMockImage(2, "https://picsum.photos/400/703")
-    ),
-    indicators = List(3) {
-        getMockIndicator(it)
-    }
-)
-
-private fun getMockImage(idx: Int, url: String) = Image(idx = idx, url = url)
-
-fun getMockIndicator(idx: Int) = Indicator(idx = idx, loading = true)
