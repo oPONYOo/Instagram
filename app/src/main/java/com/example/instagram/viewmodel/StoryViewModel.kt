@@ -2,7 +2,7 @@ package com.example.instagram.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.example.instagram.ui.model.Image
-import com.example.instagram.ui.model.Indicator
+import com.example.instagram.ui.model.ProgressInfo
 import com.example.instagram.ui.model.Story
 
 class StoryViewModel : ViewModel() {
@@ -14,16 +14,16 @@ class StoryViewModel : ViewModel() {
         idx = idx,
         name = "지냐${idx}",
         imgList = listOf(
-            getMockImage(0, "https://picsum.photos/400/701"),
+            getMockImage(0, "https://picsum.photos/1000/701"),
             getMockImage(1, "https://picsum.photos/400/702"),
             getMockImage(2, "https://picsum.photos/400/703")
         ),
-        indicators = List(3) {
+        progressInfos = List(3) {
             getMockIndicator(it)
         }
     )
 
     private fun getMockImage(idx: Int, url: String) = Image(idx = idx, url = url)
 
-    private fun getMockIndicator(idx: Int) = Indicator(idx = idx, loading = true)
+    private fun getMockIndicator(idx: Int) = ProgressInfo(idx = idx, loading = true)
 }

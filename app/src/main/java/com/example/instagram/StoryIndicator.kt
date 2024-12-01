@@ -11,17 +11,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.instagram.ui.model.Indicator
+import com.example.instagram.ui.model.ProgressInfo
 import kotlinx.coroutines.delay
 
 @Composable
-fun StoryLinearIndicator(indicators: List<Indicator>) {
-    val indicatorSize = LocalConfiguration.current.screenWidthDp / (indicators.size)
+fun StoryLinearIndicator(progressInfos: List<ProgressInfo>) {
+    val indicatorSize = LocalConfiguration.current.screenWidthDp / (progressInfos.size)
     LazyRow(
     ) {
-        items(items = indicators, key = { indicator -> indicator.idx }) {
+        items(items = progressInfos, key = { indicator -> indicator.idx }) {
             LinearProgressIndicator(
-                progress = it.currentProgress,
+                progress = { it.currentProgress },
                 Modifier
                     .width(indicatorSize.dp)
                     .padding(horizontal = 2.5.dp),

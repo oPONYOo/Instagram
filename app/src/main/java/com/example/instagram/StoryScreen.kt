@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -48,7 +47,6 @@ fun StoryScreen(
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
-            // do your stuff with selected page
             showImageOrder = 0
         }
     }
@@ -66,24 +64,20 @@ fun StoryScreen(
 
             var currentProgress by rememberSaveable { mutableFloatStateOf(0f) }
             var loading by rememberSaveable { mutableStateOf(false) }
-            val scope = rememberCoroutineScope() // Create a coroutine scope
+            val scope = rememberCoroutineScope()
+            // TODO 뷰모델로 로직 옮기기
             val nowStoryIndicators by rememberSaveable {
-                mutableStateOf(nowStory.indicators.toMutableList())
+                mutableStateOf(nowStory.progressInfos.toMutableList())
             }
-            // progress 값을 업데이트 할지여부 ... 그럼 얘를 계속..관리해야하는데?
-//            val foo: (av: Boolean) -> Float? = 0
-            var updateAvailable by remember { mutableStateOf(true) }
+
             LaunchedEffect(loading) {
                 loading = true
                 scope.launch {
+                    // 클릭해서 스토리 넘길 시에는 업데이트 하면 안됨
                     loadProgress { progress ->
-                        // loadProgress 도중에 currentProgress를 바꾸려면?
-                        // loadprogress 도중에 flag 설치?
-                        // 뷰모델로 로직 옮기자
-                        if (updateAvailable) {
                             currentProgress = progress
-                        }
                     }
+
                     if (currentProgress == 1f) {
                         currentProgress = 0f
                         if (showImageOrder < nowStory.imgListSize - 1) {
@@ -143,25 +137,28 @@ fun StoryScreen(
 
 @Composable
 fun StoryImage(
-    modifier: Modifier = Modifier,
     imgs: List<Image>,
     showImageIdx: Int,
     rightClickEvent: () -> Unit,
-    leftClickEvent: () -> Unit
+    leftClickEvent: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val image = imgs.getOrNull(showImageIdx) ?: return
     val screenWidthOffset = (LocalConfiguration.current.screenWidthDp / 2).dp
-    Box(modifier = modifier
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            detectTapGestures { offset ->
-                if (screenWidthOffset <= (offset.x).toDp()) {
-                    rightClickEvent()
-                } else {
-                    leftClickEvent()
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    if (screenWidthOffset <= (offset.x).toDp()) {
+                        rightClickEvent()
+                    } else {
+                        leftClickEvent()
+                    }
                 }
-            }
-        }) {
+            },
+        contentAlignment = Alignment.Center
+    ) {
         CoilImage(url = image.url)
     }
 }
