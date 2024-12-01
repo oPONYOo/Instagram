@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -34,12 +35,12 @@ import kotlinx.coroutines.launch
 fun StoryScreen(
     modifier: Modifier, viewModel: StoryViewModel = viewModel()
 ) {
-    val pages by remember { mutableStateOf(viewModel.pages) }
+    val pages by rememberSaveable { mutableStateOf(viewModel.pages) }
     val pagerState = rememberPagerState(pageCount = {
         pages.size
     })
 
-    var showImageOrder: Int by remember {
+    var showImageOrder: Int by rememberSaveable {
         mutableIntStateOf(0)
     }
 
@@ -63,10 +64,10 @@ fun StoryScreen(
             val nowStory = pages[idx]
             val nowStoryImgList = nowStory.imgList
 
-            var currentProgress by remember { mutableFloatStateOf(0f) }
-            var loading by remember { mutableStateOf(false) }
+            var currentProgress by rememberSaveable { mutableFloatStateOf(0f) }
+            var loading by rememberSaveable { mutableStateOf(false) }
             val scope = rememberCoroutineScope() // Create a coroutine scope
-            val nowStoryIndicators by remember {
+            val nowStoryIndicators by rememberSaveable {
                 mutableStateOf(nowStory.indicators.toMutableList())
             }
             // progress 값을 업데이트 할지여부 ... 그럼 얘를 계속..관리해야하는데?
